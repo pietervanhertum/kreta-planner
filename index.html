@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇬🇷 Kreta 2026 — Van Hertum</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #fafaf9; min-height: 100vh; color: #1c1917; }
+  .app { max-width: 720px; margin: 0 auto; padding: 12px 16px; }
+  .header { text-align: center; padding: 16px 0 12px; border-bottom: 2px solid #e7e5e4; margin-bottom: 12px; }
+  .header h1 { font-size: 22px; font-weight: 800; color: #1c1917; }
+  .header p { font-size: 13px; color: #78716c; margin-top: 4px; }
+  .views { display: flex; background: #e7e5e4; border-radius: 10px; padding: 3px; margin-bottom: 14px; gap: 2px; }
+  .view-btn { flex: 1; padding: 7px 0; border-radius: 8px; border: none; background: transparent; font-weight: 700; font-size: 12px; cursor: pointer; color: #78716c; font-family: inherit; }
+  .view-btn.active { background: #fff; color: #1c1917; box-shadow: 0 1px 3px rgba(0,0,0,0.13); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .day-tabs { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; -webkit-overflow-scrolling: touch; }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab { flex: 0 0 auto; padding: 7px 9px; border: 2px solid transparent; border-radius: 10px; background: #fff; cursor: pointer; text-align: center; min-width: 52px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); position: relative; font-family: inherit; }
+  .day-tab.active { box-shadow: 0 2px 8px var(--accent-shadow, rgba(0,0,0,0.13)); }
+  .day-tab-emoji { font-size: 17px; line-height: 1; }
+  .day-tab-label { font-size: 9.5px; font-weight: 700; color: #a8a29e; margin-top: 3px; white-space: nowrap; }
+  .day-tab.active .day-tab-label { color: var(--accent); }
+  .day-tab .highlight-dot { position: absolute; top: -2px; right: -2px; width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
+  .done-badge { color: #16a34a; background: rgba(22,163,74,0.12); padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .done-card { position: relative; }
+  .done-card::after { content: ""; position: absolute; inset: 0; background: rgba(22,163,74,0.05); border-radius: inherit; pointer-events: none; }
+  .day-tab .done-check { position: absolute; top: -3px; right: -3px; width: 13px; height: 13px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 9px; line-height: 13px; text-align: center; font-weight: 700; }
+  .day-tab .swap-mark { position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); font-size: 7px; }
+  .day-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .nav-btn { padding: 5px 12px; border-radius: 8px; border: 1px solid #d6d3d1; background: #fff; cursor: pointer; font-size: 12.5px; font-weight: 600; font-family: inherit; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .day-counter { font-size: 11.5px; color: #78716c; font-weight: 600; }
+  .day-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.07); }
+  .day-card.swap-card { border: 2px dashed var(--accent-faded); }
+  .day-head { padding: 16px 20px; border-bottom: 2px solid var(--accent-border); }
+  .day-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .type-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .swap-badge { font-size: 11px; font-weight: 700; color: #dc2626; background: #fef2f2; padding: 3px 8px; border-radius: 6px; border: 1px dashed #fca5a5; }
+  .day-title { font-size: 20px; font-weight: 800; color: #1c1917; line-height: 1.2; }
+  .day-date { font-size: 13px; color: #78716c; margin-top: 4px; }
+  .day-swap-info { font-size: 12px; color: #78716c; margin-top: 6px; }
+  .day-items { padding: 12px 20px 4px; }
+  .item-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid #f5f5f4; }
+  .item-row:last-child { border-bottom: none; }
+  .item-icon { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .item-time { font-size: 11px; font-weight: 700; margin-bottom: 1px; }
+  .item-desc { font-size: 13.5px; color: #292524; line-height: 1.45; }
+  .collapsibles { padding: 0 20px 12px; }
+  .collapsible { border-top: 1px solid #f5f5f4; }
+  .collapsible-btn { width: 100%; padding: 10px 0; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; font-family: inherit; }
+  .collapsible-arrow { margin-left: auto; font-size: 12px; transition: transform 0.2s; }
+  .collapsible.open .collapsible-arrow { transform: rotate(180deg); }
+  .collapsible-body { display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; font-size: 12.5px; line-height: 1.6; color: #92400e; margin-bottom: 8px; }
+  .collapsible.open .collapsible-body { display: block; }
+  .pitstops-body { background: #fefce8 !important; }
+  .swap-suggestion { margin-top: 10px; padding: 10px 14px; background: #fef2f2; border: 1px dashed #fca5a5; border-radius: 12px; font-size: 12.5px; color: #991b1b; line-height: 1.5; display: flex; gap: 8px; }
+  .swap-suggestion-icon { font-size: 16px; flex-shrink: 0; }
+  .swap-link { background: none; border: none; color: #dc2626; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0; font-size: 12.5px; font-family: inherit; }
+  .legend { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 14px; padding-bottom: 20px; }
+  .legend-chip { font-size: 9.5px; padding: 3px 7px; border-radius: 6px; font-weight: 600; }
+  .info-banner { border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.5; }
+  .banner-swaps { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .banner-menu { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  .swap-list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+  .menu-section { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 12px; }
+  .menu-section-head { padding: 12px 16px; background: #fafaf9; border-bottom: 1px solid #e7e5e4; }
+  .menu-section-head h3 { font-size: 15px; font-weight: 700; color: #1c1917; }
+  .menu-list { padding: 4px 16px 8px; }
+  .menu-item { padding: 10px 0; border-bottom: 1px solid #f5f5f4; display: flex; gap: 10px; }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .menu-item-name { font-size: 13.5px; font-weight: 700; color: #1c1917; }
+  .menu-item-price { font-weight: 400; color: #78716c; margin-left: 6px; font-size: 12px; }
+  .menu-item-desc { font-size: 12.5px; color: #57534e; line-height: 1.45; margin-top: 2px; }
+  .menu-item-suited { font-size: 11px; color: #10b981; font-weight: 600; margin-top: 3px; }
+  .menu-item-loc { font-size: 11px; color: #78716c; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <h1>🇬🇷 Kreta 2026</h1>
+  <p>Van Hertum–Plessers · 5–15 juni · Agios Nikolaos</p>
+</div>
+<div class="views">
+  <button class="view-btn active" data-view="plan">📋 Programma</button>
+  <button class="view-btn" data-view="swaps">🔄 Swaps</button>
+  <button class="view-btn" data-view="menu">🗺️ Menukaart</button>
+</div>
+<div class="panel active" id="panel-plan">
+  <div class="day-tabs" id="dayTabs"></div>
+  <div class="day-nav">
+    <button class="nav-btn" id="prevBtn">← Vorige</button>
+    <span class="day-counter" id="dayCounter">Dag 1/11</span>
+    <button class="nav-btn" id="nextBtn">Volgende →</button>
+  </div>
+  <div id="dayCardContainer"></div>
+  <div class="legend" id="legend"></div>
+</div>
+<div class="panel" id="panel-swaps">
+  <div class="info-banner banner-swaps">
+    <strong>🔄 Swap-opties</strong> — Alternatieve dagprogramma's. Bij elke optie staat welke dag je kunt vervangen.
+  </div>
+  <div class="swap-list" id="swapList"></div>
+</div>
+<div class="panel" id="panel-menu">
+  <div class="info-banner banner-menu">
+    <strong>🗺️ Menukaart</strong> — Activiteiten, restaurants en snackstops om ter plaatse gaten te vullen. Bewaar deze pagina op je telefoon voor impulsieve beslissingen!
+  </div>
+  <div id="menuContainer"></div>
+</div>
+</div>
+<script>
+const days = [
+  { date: "Vrijdag 5 juni", title: "Aankomst op Kreta", emoji: "\u2708\ufe0f", type: "reisdag",
+    items: [
+      { time: "11:00", desc: "Vertrek vanuit Pelt richting K\u00f6ln-Bonn Airport (\u00b12u rijden + marge)", icon: "\ud83d\ude97" },
+      { time: "13:00", desc: "Aankomst luchthaven \u2014 2 uur voor vertrek, inchecken, kinderen laten spelen", icon: "\ud83e\uddf3" },
+      { time: "16:00", desc: "Vlucht XR413 K\u00f6ln \u2192 Heraklion (3u35)", icon: "\u2708\ufe0f" },
+      { time: "20:35", desc: "Aankomst Heraklion \u2014 huurauto ophalen (creditcard klaar!)", icon: "\ud83d\udd11" },
+      { time: "21:30", desc: "Rijden naar Candia Park Village (\u00b11u)", icon: "\ud83d\ude97" },
+      { time: "22:30", desc: "Check-in, kinderen naar bed, ouders een welkomstdrankje op het terras", icon: "\ud83c\udf19" }
+    ],
+    pitstops: "Neem broodjes mee voor in de auto en het vliegtuig. Bij aankomst op het hotel is de keuken waarschijnlijk dicht \u2014 neem snacks mee of haal onderweg bij een tankstation iets te eten.",
+    tip: "Vertrek om 11:00 uit Pelt: 2u rijden + marge + 2u voor vertrek = ruim op tijd. Autostoeltjes bij de verhuurder reserveren of eigen meenemen. Zet het hoteladres in Google Maps offline.",
+    highlight: false, swappable: false, done: true },
+  { date: "Zaterdag 6 juni", title: "Aankomen & Agios Nikolaos", emoji: "\ud83c\udfd6\ufe0f", type: "rustig",
+    items: [
+      { time: "Ochtend", desc: "Uitslapen, ontbijt in Candia Park, zwembad & kinderbad verkennen", icon: "\ud83c\udfca" },
+      { time: "11:00", desc: "Supermarkt voor basisbenodigdheden (water, fruit, zonnebrand)", icon: "\ud83d\uded2" },
+      { time: "Middag", desc: "Wandeling door Agios Nikolaos: Voulismeni-meer, haven, ijsje", icon: "\ud83c\udf66" },
+      { time: "15:00", desc: "Speeltuintje of strandje van Candia Park", icon: "\ud83c\udfa0" },
+      { time: "Avond", desc: "Eerste taverna-avond in Agios Nikolaos", icon: "\ud83c\udf7d\ufe0f" }
+    ],
+    pitstops: "\ud83c\udf66 IJssalon bij het Voulismeni-meer (meerdere gelateria's aan de westzijde) \u00b7 \ud83c\udf7d\ufe0f Avondeten: Avli Taverna \u2014 authentieke Kretenzische keuken in een groene binnentuin, kinderen welkom, gedeelde mezze-bordjes \u00b7 \ud83e\udd59 Alternatief: Maistrali bij Kitroplatia Beach \u2014 tafeltjes op het strand, relaxed met kids, gedeelde schotels \u00b7 \u2615 Koffie: Caf\u00e9 du Lac aan het meer \u2014 perfect terras terwijl de kinderen rondrennen",
+    tip: "Gebruik deze dag om te acclimatiseren. Smeer vroeg en vaak in! Alle taverna's op Kreta zijn kindvriendelijk \u2014 Grieken zijn dol op kinderen en niemand kijkt raar als ze rondlopen.",
+    highlight: false, swappable: false, done: true },
+  { date: "Zondag 7 juni", title: "Spinalonga & Plaka", emoji: "\ud83c\udff0", type: "uitstap",
+    items: [
+      { time: "09:00", desc: "Ontbijt in het hotel, vertrekken richting Plaka (\u00b120 min)", icon: "\ud83d\ude97" },
+      { time: "10:00", desc: "Boot naar Spinalonga vanuit Plaka (10 min, \u20ac12 p.p., kinderen gratis)", icon: "\u26f5" },
+      { time: "10:30", desc: "Spinalonga verkennen \u2014 fort, oude straatjes, uitzichten (\u00b11,5u)", icon: "\ud83c\udff0" },
+      { time: "12:30", desc: "Terug met de boot, lunch in Plaka", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "14:30", desc: "Wandelen in Elounda, haven bekijken, evt. zwemmen", icon: "\ud83d\udeb6" },
+      { time: "17:00", desc: "Terug naar hotel", icon: "\ud83c\udf05" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch Plaka: Taverna Spinalonga \u2014 familiebedrijf recht aan zee met uitzicht op het eiland, verse vis, relaxed met kinderen \u00b7 \ud83c\udf7d\ufe0f Alternatief: Taverna Maria's \u2014 de oudste taverna van Plaka, authentiek Grieks, warm onthaal \u00b7 \ud83c\udf66 Elounda: Babel Caf\u00e9 aan het dorpsplein \u2014 ijsjes, drankjes, tafeltjes met zeezicht, kids kunnen rondlopen op het plein \u00b7 \ud83c\udf7d\ufe0f Diner Elounda: Marilena Restaurant \u2014 familiebedrijf sinds 1977, Kretenzisch eten, kindvriendelijk terras",
+    tip: "Ga vroeg om drukte te vermijden! Neem een buggy mee voor Rosie. Vertel Otto het verhaal van de piraten en het fort. Op Spinalonga zelf is een klein caf\u00e9 voor drankjes.",
+    highlight: true, swappable: false, done: true },
+  { date: "Maandag 8 juni", title: "Cretaquarium & Dinosauria", emoji: "\ud83d\udc1f", type: "kinderdag",
+    items: [
+      { time: "09:00", desc: "Ontbijt, vertrekken naar Cretaquarium in Gournes (\u00b150 min)", icon: "\ud83d\ude97" },
+      { time: "09:45", desc: "Cretaquarium: haaien, zeepaardjes, kwallen (\u20ac12 p.p., \u00b11,5-2u)", icon: "\ud83d\udc1f" },
+      { time: "12:00", desc: "Dinosauria Park ernaast in Gouves: levensgrote dino's, fossielen! (\u00b12u)", icon: "\ud83e\udd95" },
+      { time: "15:00", desc: "Terugrijden naar Agios Nikolaos", icon: "\ud83d\ude97" },
+      { time: "16:00", desc: "Almyros / Beti Beach: snorkelen met Otto bij de rotsen \u2014 visjes spotten!", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "Avond", desc: "Taverna in Agios Nikolaos", icon: "\ud83c\udf7d\ufe0f" }
+    ],
+    pitstops: "\u2615 Cretaquarium: caf\u00e9 ter plaatse voor drankjes & snacks \u00b7 \ud83c\udf7d\ufe0f Lunch Gouves: restaurant in Dinosauria Park of taverna in het dorp aan zee \u00b7 \ud83c\udf7d\ufe0f Diner: Creta Embassy Tavern in Agios Nikolaos \u2014 gezellige setting in een steegje, traditioneel met een twist, Travelers' Choice, kids welkom",
+    tip: "\u2705 GEDAAN \u2014 heel leuk! Cretaquarium + Dinosauria in Gournes/Gouves gecombineerd, afgesloten met snorkelen op Almyros/Beti (Otto spotte visjes bij de rotsen).",
+    highlight: true, swappable: false, done: true },
+  { date: "Dinsdag 9 juni", title: "Knossos & Voulisma", emoji: "\ud83c\udfdb\ufe0f", type: "cultuur",
+    items: [
+      { time: "08:00", desc: "Vroeg ontbijt, vertrekken richting Knossos (\u00b11u15)", icon: "\ud83d\ude97" },
+      { time: "09:30", desc: "Paleis van Knossos (\u20ac26 p.p., kinderen gratis, \u00b12u)", icon: "\ud83c\udfdb\ufe0f" },
+      { time: "12:00", desc: "Terugrijden richting Istron / Voulisma (\u00b11u15)", icon: "\ud83d\ude97" },
+      { time: "13:30", desc: "Lunch & zwemmen bij Voulisma Beach \u2014 turquoise, ondiep, kindvriendelijk", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "16:30", desc: "Terug naar hotel, zwembad", icon: "\ud83c\udfca" },
+      { time: "Avond", desc: "Diner in Agios Nikolaos", icon: "\ud83c\udf7d\ufe0f" }
+    ],
+    pitstops: "\ud83e\udd59 Snack bij Knossos: er zijn kiosken bij de ingang \u2014 water en snacks kopen v\u00f3\u00f3r de rondgang \u00b7 \ud83c\udf7d\ufe0f Lunch Voulisma: beachbar bij het strand \u2014 fris, casual, kinderen kunnen heen en weer naar het water \u00b7 \ud83c\udf7d\ufe0f Diner terug in Agios: Gioma Meze \u2014 intiem terrasje met uitzicht op het meer, gedeelde Kretenzische bordjes, maar boek vooraf (populair!)",
+    tip: "Dinosauria al gedaan op dag 4, dus vandaag rustiger: Knossos in de koele ochtend, namiddag relaxen op Voulisma. Knossos heeft weinig schaduw \u2014 ga vroeg, hoedjes mee. Koop tickets online.",
+    highlight: true, swappable: false, done: true },
+  { date: "Woensdag 10 juni", title: "Relaxdag \u2014 Hotel & Kids Club", emoji: "\ud83d\ude0e", type: "rustig",
+    items: [
+      { time: "Ochtend", desc: "Uitslapen, lang ontbijt, Kids Club voor Otto (gratis!)", icon: "\ud83e\uddd2" },
+      { time: "11:00", desc: "Zwembad & strandje van het hotel", icon: "\ud83c\udfca" },
+      { time: "Middag", desc: "Lunch bij het zwembad, ijsje bij de Gelateria", icon: "\ud83c\udf66" },
+      { time: "15:00", desc: "Watersport of Kids Club activiteiten", icon: "\ud83c\udfa8" },
+      { time: "17:00", desc: "Wandeling Agios Nikolaos, souvenirs", icon: "\ud83d\udecd\ufe0f" },
+      { time: "Avond", desc: "Grieks avondeten", icon: "\ud83d\udc1f" }
+    ],
+    pitstops: "\ud83c\udf55 Lunch: bij het zwembad van het hotel (Plori poolbar) of To Fili strandtaverna van het hotel \u2014 voeten in het zand \u00b7 \ud83c\udf66 IJsje: Gelateria in het hotel of in Agios Nikolaos bij het meer \u00b7 \ud83c\udf7d\ufe0f Diner: Chrysofyllis in Agios \u2014 echte vistarverna aan de haven, verse vangst, relaxed terras, kids mogen vrij rondlopen \u00b7 \ud83c\udf7d\ufe0f Alternatief: Potiraki \u2014 creatieve Kretenzische keuken, mooie binnentuin, iets chiquer maar zeker kindvriendelijk",
+    tip: "Rustdag! Kids Club heeft schatzoektochten, Griekse kooklessen en knutselen. Otto mag alleen in (4+), Rosie met een ouder erbij.",
+    highlight: false, swappable: true, swapOptions: ["swap-zuidkust", "swap-rethymno"] },
+  { date: "Donderdag 11 juni", title: "Lassithi-plateau & Kritsa", emoji: "\u26f0\ufe0f", type: "uitstap",
+    items: [
+      { time: "09:00", desc: "Vertrek richting Kritsa (\u00b115 min)", icon: "\ud83d\ude97" },
+      { time: "09:30", desc: "Wandeling door Kritsa: steegjes, ambachtswinkeltjes", icon: "\ud83c\udfd8\ufe0f" },
+      { time: "10:30", desc: "Doorrijden naar Lassithi-plateau (\u00b140 min bergweg)", icon: "\ud83d\ude97" },
+      { time: "11:30", desc: "Plateau verkennen: windmolens, dorpjes, uitzicht", icon: "\u26f0\ufe0f" },
+      { time: "12:00", desc: "Zeus-grot: ezelrit + Mythologie Themapark", icon: "\ud83e\udd6f" },
+      { time: "13:00", desc: "Lunch in een dorpstaverna op het plateau", icon: "\ud83c\udf56" },
+      { time: "14:30", desc: "Dorp Krasi: oudste platanen van Kreta, Venetiaanse fontein", icon: "\ud83c\udf33" },
+      { time: "16:00", desc: "Terugrijden naar hotel", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\u2615 Kritsa: koffie of vers sinaasappelsap bij een kafenion op het dorpsplein \u2014 Otto en Rosie kunnen op het pleintje spelen \u00b7 \ud83c\udf56 Lunch plateau: taverna bij de Zeus-grot parking \u2014 heerlijk gebraden varken uit de houtoven, aardappelen van het plateau, berglucht! \u00b7 \ud83c\udf7d\ufe0f Alternatief: Taverna Krasi in het gelijknamige dorp \u2014 terras onder de eeuwenoude plataan, heerlijke dakos en lamsvlees \u00b7 \ud83c\udf7d\ufe0f Diner terug: licht eten bij het hotel of een gyros-pita halen in Agios Nikolaos (snel & lekker met vermoeide kinderen)",
+    tip: "\u26a0\ufe0f De Zeus-grot is mogelijk dicht voor renovatie \u2014 check voor vertrek! Het plateau zelf en de rit zijn sowieso geweldig. Neem een trui mee: 5-10\u00b0C koeler dan de kust!",
+    highlight: false, swappable: false },
+  { date: "Vrijdag 12 juni", title: "Richtis-waterval & Mochlos", emoji: "\ud83c\udf0a", type: "avontuur", 
+    items: [
+      { time: "08:30", desc: "Vroeg vertrek richting Richtis Beach (\u00b11u-1u15)", icon: "\ud83d\ude97" },
+      { time: "09:45", desc: "Met de auto naar de strandparking Richtis (\u20ac3 p.p. 16+)", icon: "\ud83c\udd7f\ufe0f" },
+      { time: "10:00", desc: "Korte wandeling naar de waterval (\u00b120 min, schaduwrijk)", icon: "\ud83e\udd7e" },
+      { time: "10:45", desc: "Waterval! Spelen bij het bassin, picknicken", icon: "\ud83c\udf0a" },
+      { time: "11:30", desc: "Terug naar de strandparking, even pootjebaden", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "12:30", desc: "Doorrijden naar Mochlos (\u00b135-40 min westwaarts)", icon: "\ud83d\ude97" },
+      { time: "13:15", desc: "Lunch aan het water in Mochlos", icon: "\ud83d\udc19" },
+      { time: "14:30", desc: "Zwemmen Mochlos: ondiep & kalm, eilandje spotten", icon: "\ud83e\udd3f" },
+      { time: "15:45", desc: "Terugrijden naar hotel (\u00b140 min)", icon: "\ud83d\ude97" },
+      { time: "Avond", desc: "Eten in Elounda", icon: "\ud83c\udf05" }
+    ],
+    pitstops: "\ud83e\udd6a Picknick: neem brood, kaas, fruit & water mee voor bij de waterval \u2014 geen faciliteiten in de kloof \u00b7 \ud83c\udf7d\ufe0f Lunch Mochlos: Bogazi \u2014 tafeltjes recht aan het water, verse vis & octopus, kinderen spelen op de kade \u00b7 \ud83c\udf7d\ufe0f Alternatief: Ta Kochilia \u2014 iets verder, ook aan zee, zelfde relaxte vibe \u00b7 \ud83c\udf66 Frappes & ijsjes in het minimarktje van Mochlos \u00b7 \ud83c\udf7d\ufe0f Diner Elounda: The Hope \u2014 prachtig uitzicht, traditioneel Grieks, terras met zeezicht, kindvriendelijk",
+    tip: "Slim geordend: wandeling in de koele ochtend \u00e9n je werkt geografisch westwaarts terug naar huis. Rij 's ochtends de smalle weg naar beneden (minder tegenliggers). Draagzak voor Rosie op de rotsige stukken. Keer om als ze moe wordt \u2014 de waterval is dichtbij.",
+    highlight: true, swappable: true, swapOptions: ["swap-mochlos-only", "swap-chrysi"] },
+  { date: "Zaterdag 13 juni", title: "Relaxdag \u2014 Hotel & Kids Club", emoji: "\ud83d\ude0e", type: "rustig",
+    items: [
+      { time: "Ochtend", desc: "Uitslapen, rustig ontbijt", icon: "\u2600\ufe0f" },
+      { time: "10:00", desc: "Kinderen naar de Kids Club / hotelzwembad", icon: "\ud83c\udfa0" },
+      { time: "10:30", desc: "Duiken via PADI-duikcentrum hotel (Pieter & Lieze, om de beurt of samen)", icon: "\ud83e\udd3f" },
+      { time: "12:30", desc: "Lunch bij het hotel of strandje", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "Namiddag", desc: "Niksen: zwembad, strand, korte kustwandeling rond het meer", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "Avond", desc: "Relaxt eten aan Lake Voulismeni (Karnagio)", icon: "\ud83c\udf05" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch: hotelrestaurant of een snack bij het strandje \u00b7 \ud83c\udf66 IJsje aan het meer in Agios Nikolaos \u00b7 \ud83c\udf7d\ufe0f Diner: Karnagio / Pita tou Riga aan het meer \u2014 kindvriendelijk, grote porties, snelle service",
+    tip: "Echte herstel-dag tussen de actieve dagen en de verjaardag. Duiken is voor jou en Lieze (Mares-tas staat al klaar!) \u2014 het hotelduikcentrum verzorgt de uitrusting. Boek het duiken de dag ervoor even aan de receptie. Geen autorit nodig.",
+    highlight: false, swappable: true, swapOptions: ["swap-richtis-kloof", "swap-zakros"] },
+  { date: "Zondag 14 juni", title: "Verjaardag & zelf varen", emoji: "\u26f5", type: "feest",
+    items: [
+      { time: "08:30", desc: "Verjaardagsontbijt! \ud83c\udf88 Taartje + cadeautjes!", icon: "\ud83c\udf82" },
+      { time: "09:45", desc: "Vertrek richting Plaka (\u00b125 min)", icon: "\ud83d\ude97" },
+      { time: "10:15", desc: "Minos Boats: briefing & instructie (klok start daarna)", icon: "\ud83d\udee5\ufe0f" },
+      { time: "10:45", desc: "Zelf varen! Langs Spinalonga (het piratenfort) vanaf zee", icon: "\u26f5" },
+      { time: "11:30", desc: "Ankeren in een rustige baai \u2014 zwemmen & snorkelen", icon: "\ud83e\udd3f" },
+      { time: "12:30", desc: "Picknick aan boord, kapitein Otto aan het roer!", icon: "\ud83e\uddd1\u200d\u2708\ufe0f" },
+      { time: "13:30", desc: "Terug naar Plaka, boot inleveren", icon: "\u2693" },
+      { time: "14:00", desc: "Lunch in Plaka met uitzicht op Spinalonga", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "Avond", desc: "Feestelijk laatste diner!", icon: "\ud83e\udd42" }
+    ],
+    pitstops: "\ud83c\udf82 Taart: bestel de dag ervoor bij een bakker (\u03b6\u03b1\u03c7\u03b1\u03c1\u03bf\u03c0\u03bb\u03b1\u03c3\u03c4\u03b5\u03af\u03bf) in Agios Nikolaos \u2014 vraag naar een kindertaart \u00b7 \ud83c\udf7d\ufe0f Lunch Plaka: Taverna Spinalonga \u2014 familiebedrijf aan zee, verse vis, uitzicht op het eiland \u00b7 \ud83c\udf7d\ufe0f Alternatief: Taverna Maria's \u2014 oudste taverna van Plaka, warm onthaal \u00b7 \ud83e\udd42 Feestdiner: Piato in Agios Nikolaos \u2014 creatief Grieks, balkon met zeezicht (boek vooraf, vraag om balkontafel!) \u00b7 \ud83c\udf7d\ufe0f Relaxter: Psomi kai Alati bij Elounda \u2014 rustiger familietaverna, avondzon",
+    tip: "Zelf varen naar het piratenfort = het ultieme verjaardagscadeau voor Otto. Geen vaarbewijs nodig, geldig ID mee, bestuurder 18+. Ga 's ochtends (kalmste water). Minos Boats: brand-new bootjes, koelbox & GPS-app aan boord, grondige briefing v\u00f3\u00f3r vertrek. Reserveer een dag vooraf \u2014 bij wind herplannen.",
+    highlight: true, swappable: true, swapOptions: ["swap-vai"] },
+  { date: "Maandag 15 juni", title: "Laatste ochtend & vertrek", emoji: "\ud83d\udc4b", type: "reisdag",
+    items: [
+      { time: "Ochtend", desc: "Laatste ontbijt, zwembad, strandje", icon: "\u2600\ufe0f" },
+      { time: "12:00", desc: "Check-out", icon: "\ud83e\uddf3" },
+      { time: "12:30", desc: "Laatste lunch", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "15:00", desc: "Vertrek richting Heraklion Airport (\u00b11u15)", icon: "\ud83d\ude97" },
+      { time: "16:30", desc: "Huurauto inleveren, inchecken", icon: "\u2708\ufe0f" },
+      { time: "19:45", desc: "Vlucht XR412 \u2192 K\u00f6ln-Bonn (3u45)", icon: "\u2708\ufe0f" },
+      { time: "22:30", desc: "Aankomst K\u00f6ln, rijden naar Pelt (\u00b12u)", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Laatste lunch: Migomis aan de haven van Agios Nikolaos \u2014 mooi terras boven het water, fijne keuken, relaxte afscheidslunch \u00b7 \ud83e\udd59 Snelle optie: gyros-pita meenemen voor onderweg naar het vliegveld \u00b7 \u2615 Heraklion airport: er zijn caf\u00e9's na de security \u2014 neem iets te eten mee voor de kinderen in het vliegtuig",
+    tip: "Lever de huurauto ruim op tijd in. Tank vol v\u00f3\u00f3r terugkomst. Check of jullie niets vergeten \u2014 knuffels zijn de usual suspects!",
+    highlight: false, swappable: false }
+];
+
+const swapDays = [
+  { id: "swap-chrysi", title: "Chrysi Island", emoji: "\ud83c\udfdd\ufe0f", type: "avontuur", rijtijd: "45 min + 1u boot", vervangt: "Mochlos (dag 8)",
+    items: [
+      { time: "08:00", desc: "Vroeg ontbijt, naar Ierapetra (\u00b145 min)", icon: "\ud83d\ude97" },
+      { time: "09:30", desc: "Boot naar Chrysi (\u00b11u)", icon: "\u26f5" },
+      { time: "10:30", desc: "Caribisch water, schelpenstranden", icon: "\ud83c\udfdd\ufe0f" },
+      { time: "12:30", desc: "Picknick (neem alles mee!)", icon: "\ud83e\udd59" },
+      { time: "15:00", desc: "Boot retour", icon: "\u26f5" },
+      { time: "16:00", desc: "IJsje in Ierapetra", icon: "\ud83c\udf66" },
+      { time: "17:00", desc: "Terug naar hotel", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\ud83e\udd59 Neem een picknick mee \u2014 minimale faciliteiten op het eiland \u00b7 \ud83c\udf7d\ufe0f Na terugkomst: Napoleon in Ierapetra \u2014 fijne taverna aan de haven",
+    tip: "Onbewoond eilandje, kristalhelder water, cedarenbos. Check het weer: bij wind vaart de boot niet." },
+  { id: "swap-zuidkust", title: "Ierapetra & Zuidkust", emoji: "\ud83c\udf35", type: "uitstap", rijtijd: "\u00b145 min", vervangt: "Relaxdag (dag 6)",
+    items: [
+      { time: "09:30", desc: "Naar Ierapetra (\u00b145 min)", icon: "\ud83d\ude97" },
+      { time: "10:30", desc: "Ierapetra: zuidelijkste stad van Europa!", icon: "\ud83c\udfd8\ufe0f" },
+      { time: "12:00", desc: "Naar Makry Gialos (\u00b120 min)", icon: "\ud83d\ude97" },
+      { time: "12:30", desc: "Zwemmen en lunch", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "16:30", desc: "Terug via bergpas", icon: "\u26f0\ufe0f" }
+    ],
+    pitstops: "\u2615 Ierapetra: koffie aan de boulevard \u00b7 \ud83c\udf7d\ufe0f Makry Gialos: strandtaverna met voeten in het zand \u2014 kids spelen in ondiep water",
+    tip: "De zuidkust is een andere wereld: droger, rustiger, Afrikaans landschap. Bochtige bergweg terug." },
+  { id: "swap-rethymno", title: "Dagtrip Rethymno", emoji: "\ud83e\udd81", type: "cultuur", rijtijd: "\u00b12u", vervangt: "Relaxdag (dag 6)",
+    items: [
+      { time: "08:00", desc: "Vroeg vertrekken (\u00b12u)", icon: "\ud83d\ude97" },
+      { time: "10:30", desc: "Fortezza (Venetiaans fort)", icon: "\ud83c\udff0" },
+      { time: "11:30", desc: "Oude Stad wandelen", icon: "\ud83d\udd4c" },
+      { time: "12:30", desc: "Lunch aan Venetiaanse haven", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "14:00", desc: "Strand of speeltuin", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "16:00", desc: "Terugrijden (\u00b12u)", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch: Othonas aan de oude haven \u2014 vis, terras, kindvriendelijk \u00b7 \ud83c\udf66 Ijs: bij de Rimondi-fontein",
+    tip: "Mooiste stad van Kreta maar 4u rijden retour. Alleen als de kinderen goed in de auto zitten!" },
+  { id: "swap-zakros", title: "Zakros & Dode-Stadkloof", emoji: "\ud83d\udc80", type: "avontuur", rijtijd: "\u00b11u30", vervangt: "Richtis (dag 9)",
+    items: [
+      { time: "08:00", desc: "Vroeg vertrekken (\u00b11u30)", icon: "\ud83d\ude97" },
+      { time: "09:45", desc: "Vallei der Doden wandelen (\u00b145 min bergaf)", icon: "\ud83e\udd7e" },
+      { time: "11:00", desc: "Kato Zakros: Mino\u00efsch paleis aan zee", icon: "\ud83c\udfdb\ufe0f" },
+      { time: "12:30", desc: "Lunch & zwemmen", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "15:00", desc: "Terugrijden", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch: Akrogiali Taverna in Kato Zakros \u2014 een van slechts twee taverna's, recht aan het strand, verse vis, totale rust",
+    tip: "De 'Vallei der Doden' is een makkelijke wandeling bergaf. Naam komt van Mino\u00efsche graven in de rotswanden. Kato Zakros = ultiem afgelegen." },
+  { id: "swap-mochlos-only", title: "Mochlos & Oostkust (alleen)", emoji: "\ud83d\udc19", type: "avontuur", rijtijd: "\u00b130 min", vervangt: "Richtis+Mochlos (dag 8)",
+    items: [
+      { time: "09:30", desc: "Vertrek richting Mochlos (\u00b130 min)", icon: "\ud83d\ude97" },
+      { time: "10:15", desc: "Mochlos verkennen, pittoresk vissersdorpje", icon: "\ud83c\udfd8\ufe0f" },
+      { time: "11:00", desc: "Zwemmen in de heldere baai", icon: "\ud83e\udd3f" },
+      { time: "12:30", desc: "Lunch aan het water", icon: "\ud83d\udc19" },
+      { time: "14:30", desc: "Doorrijden naar Tholos Beach (\u00b120 min)", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "17:00", desc: "Terugrijden naar hotel", icon: "\ud83d\ude97" },
+      { time: "Avond", desc: "Eten in Elounda", icon: "\ud83c\udf05" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch Mochlos: Bogazi \u2014 tafeltjes recht aan het water, verse vis & octopus, kinderen spelen op de kade \u00b7 \ud83c\udf7d\ufe0f Alternatief: Ta Kochilia \u00b7 \ud83c\udf66 Frappes & ijsjes in Mochlos \u00b7 \ud83c\udf7d\ufe0f Diner Elounda: The Hope \u2014 prachtig uitzicht, traditioneel Grieks, terras met zeezicht",
+    tip: "Backup: alleen Mochlos zonder de Richtis-waterval. Mochlos is authentiek, rustig, ongelooflijk mooie baai. Het eilandje tegenover het dorp heeft Mino\u00efsche ru\u00efnes!" },
+  { id: "swap-richtis-kloof", title: "Richtis-kloof & waterval + Sitia", emoji: "\ud83c\udf0a", type: "avontuur", rijtijd: "\u00b150 min", vervangt: "Relaxdag (dag 9)",
+    items: [
+      { time: "08:30", desc: "Vroeg ontbijt, vertrekken richting Richtis Beach (\u00b150 min)", icon: "\ud83d\ude97" },
+      { time: "09:45", desc: "Parkeren bij Richtis Beach (\u20ac3 p.p. 16+)", icon: "\ud83c\udd7f\ufe0f" },
+      { time: "10:00", desc: "Wandeling naar de waterval (\u00b120 min)", icon: "\ud83e\udd7e" },
+      { time: "10:45", desc: "Waterval! Spelen bij het bassin, picknicken", icon: "\ud83c\udf0a" },
+      { time: "12:00", desc: "Teruglopen naar Richtis Beach", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "13:30", desc: "Doorrijden naar Sitia (\u00b125 min)", icon: "\ud83d\ude97" },
+      { time: "14:00", desc: "Lunch in Sitia, stadje verkennen", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "16:00", desc: "Terugrijden naar hotel", icon: "\ud83d\ude97" }
+    ],
+    pitstops: "\ud83e\udd6a Picknick: brood, kaas, fruit & water mee \u2014 geen faciliteiten in de kloof \u00b7 \ud83c\udf7d\ufe0f Lunch Sitia: Balcony Restaurant aan de haven \u2014 mooi uitzicht, verse vis, kindvriendelijk \u00b7 \ud83c\udf7d\ufe0f Alternatief: Serra\u00efno bij de haven \u00b7 \ud83c\udf66 IJs aan de haven van Sitia",
+    tip: "Backup: de losse Richtis-dag (zonder Mochlos eraan). Neem de korte route vanaf Richtis Beach (\u00b120 min). Waterschoenen, draagzak en stevige schoenen mee. Geen zonnebrand in het water!" },
+  { id: "swap-vai", title: "Vai Palmenstrand", emoji: "\ud83c\udf34", type: "feest", rijtijd: "\u00b11u15", vervangt: "Zelf varen (dag 10)",
+    items: [
+      { time: "08:30", desc: "Verjaardagsontbijt! \ud83c\udf88 Taartje + cadeautjes!", icon: "\ud83c\udf82" },
+      { time: "10:00", desc: "Vertrek richting Vai Palmenstrand (\u00b11u15)", icon: "\ud83d\ude97" },
+      { time: "11:30", desc: "Vai Palm Beach: palmbos aan zee!", icon: "\ud83c\udf34" },
+      { time: "12:30", desc: "Zwemmen en spelen bij Vai, lunch", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "14:30", desc: "Evt. stop klooster van Toplou", icon: "\u26ea" },
+      { time: "16:00", desc: "Terugrijden", icon: "\ud83d\ude97" },
+      { time: "Avond", desc: "Feestelijk laatste diner!", icon: "\ud83e\udd42" }
+    ],
+    pitstops: "\ud83c\udf82 Taart: bestel de dag ervoor bij een bakker in Agios Nikolaos \u00b7 \ud83c\udf7d\ufe0f Lunch Vai: beachbar/kantine bij het strand \u2014 basic maar prima voor kids \u00b7 \ud83c\udf7d\ufe0f Onderweg terug: betere lunch in Sitia \u00b7 \ud83e\udd42 Feestdiner: Piato in Agios Nikolaos (boek vooraf, balkontafel!)",
+    tip: "Backup voor de verjaardag: het grootste palmenbos van Europa, uniek landschap. Wel de langste rit (\u00b11u15 enkel). Alleen kiezen als de kinderen die dag goed in de auto zitten." },
+  { id: "swap-rustdag-duik", title: "Rustdag + duiken", emoji: "\ud83e\udd3f", type: "rustig", rijtijd: "geen", vervangt: "Richtis+Mochlos (dag 8)",
+    items: [
+      { time: "Ochtend", desc: "Uitslapen, rustig ontbijt", icon: "\u2600\ufe0f" },
+      { time: "10:00", desc: "Kinderen naar de Kids Club / hotelzwembad", icon: "\ud83c\udfa0" },
+      { time: "10:30", desc: "Duiken via PADI-duikcentrum hotel (Pieter & Lieze, om de beurt of samen)", icon: "\ud83e\udd3f" },
+      { time: "12:30", desc: "Lunch bij het hotel of strandje", icon: "\ud83c\udf7d\ufe0f" },
+      { time: "Namiddag", desc: "Niksen: zwembad, strand, korte kustwandeling rond het meer", icon: "\ud83c\udfd6\ufe0f" },
+      { time: "Avond", desc: "Relaxt eten aan Lake Voulismeni (Karnagio)", icon: "\ud83c\udf05" }
+    ],
+    pitstops: "\ud83c\udf7d\ufe0f Lunch: hotelrestaurant of een snack bij het strandje \u00b7 \ud83c\udf66 IJsje aan het meer in Agios Nikolaos \u00b7 \ud83c\udf7d\ufe0f Diner: Karnagio / Pita tou Riga aan het meer \u2014 kindvriendelijk, grote porties, snelle service",
+    tip: "Echte herstel-dag tussen de actieve dagen. Duiken is voor jou en Lieze (Mares-tas staat al klaar!) \u2014 het hotelduikcentrum verzorgt de uitrusting. Boek het duiken de dag ervoor even aan de receptie. Geen autorit nodig." }
+];
+
+const menukaart = {
+  activiteiten: [
+    { naam: "Semi-onderzee\u00ebr Agios Nikolaos", desc: "Glasbodem boot vanuit de haven, vissen spotten zonder nat te worden", geschikt: "Perfect voor Rosie & Otto", locatie: "Haven Agios Nikolaos", duur: "\u00b11u", icon: "\ud83d\udea2" },
+    { naam: "Zelf varen \u2014 Minos Boats (Plaka)", desc: "Brand-new motorbootje, geen vaarbewijs nodig, langs Spinalonga & verstopte baaien. Grondige briefing, koelbox & GPS-app aan boord", geschikt: "Avontuurlijk met de hele familie (zie dag 10!)", locatie: "Plaka (\u00b125 min)", duur: "halve dag", icon: "\u26f5" },
+    { naam: "Snorkelen bij Candia Park", desc: "Het huisrif bij het hotel is verrassend goed voor beginners", geschikt: "Otto kan mee met zwemvest", locatie: "Hotelstrandje", duur: "vrij", icon: "\ud83e\udd3f" },
+    { naam: "Mini-golf Sissi", desc: "18-holes minigolf in badplaats Sissi", geschikt: "Leuk voor Otto, Rosie kijkt mee", locatie: "Sissi (\u00b120 min)", duur: "\u00b11u", icon: "\u26f3" },
+    { naam: "Horseback riding Fourni", desc: "Korte ponyrit door het Kretenzische landschap", geschikt: "Otto op een pony!", locatie: "Fourni (\u00b125 min)", duur: "\u00b11u", icon: "\ud83d\udc34" },
+    { naam: "Happy Train Sissi/Agios", desc: "Toeristentreintje door de stad \u2014 kitsch maar kids vinden het geweldig", geschikt: "Beide kinderen", locatie: "Agios Nikolaos", duur: "\u00b130 min", icon: "\ud83d\ude82" },
+    { naam: "Speeltuin Agios Nikolaos", desc: "Openbare speeltuin bij het stadspark, nabij het meer", geschikt: "Beide kinderen", locatie: "Centrum Agios Nikolaos", duur: "vrij", icon: "\ud83c\udfa0" },
+    { naam: "Watersport bij het hotel", desc: "Kano\u00ebn, windsurfen, duiken via het PADI-duikcentrum van het hotel", geschikt: "Pieter & Lieze (om de beurt!)", locatie: "Candia Park Village", duur: "1-2u", icon: "\ud83c\udfc4" },
+    { naam: "Olijfolieboerderij bezoeken", desc: "Proeverij en rondleiding, kinderen mogen helpen persen", geschikt: "Educatief & lekker", locatie: "Diverse, \u00b120-30 min rijden", duur: "\u00b11,5u", icon: "\ud83e\uded2" },
+    { naam: "Grieks kooklesje (Kids Club)", desc: "In het hotel \u2014 kids maken hun eigen Griekse gerechten", geschikt: "Otto (via Kids Club)", locatie: "Candia Park Village", duur: "activiteit", icon: "\ud83d\udc68\u200d\ud83c\udf73" }
+  ],
+  eten_agios: [
+    { naam: "Avli Taverna", desc: "Binnentuin, authentiek Kretenzisch, gedeelde mezze. Slakken in rozemarijn zijn een must!", type: "Taverna", prijs: "\u20ac\u20ac", icon: "\ud83c\udf3f" },
+    { naam: "Maistrali", desc: "Tafels op Kitroplatia Beach, gedeelde schotels, relaxed met kids op het strand", type: "Strandtaverna", prijs: "\u20ac\u20ac", icon: "\ud83c\udfd6\ufe0f" },
+    { naam: "Creta Embassy", desc: "Steegje in het centrum, traditioneel met twist, Travelers' Choice. Reserveer!", type: "Restaurant", prijs: "\u20ac\u20ac", icon: "\ud83c\udfdb\ufe0f" },
+    { naam: "Stavros Taverna", desc: "Mama Maria runt dit al 45+ jaar. Superauthentiek, enorme porties, warm onthaal", type: "Taverna", prijs: "\u20ac", icon: "\ud83d\udc75" },
+    { naam: "Gioma Meze", desc: "Intiem terras met uitzicht op het meer, gedeelde Kretenzische bordjes. Boek vooraf!", type: "Mezze", prijs: "\u20ac\u20ac-\u20ac\u20ac\u20ac", icon: "\ud83c\udf77" },
+    { naam: "Chrysofyllis", desc: "Echte vistaverna aan de haven, verse vangst van de dag, relaxed terras", type: "Vis", prijs: "\u20ac\u20ac", icon: "\ud83d\udc1f" },
+    { naam: "Piato", desc: "Creatief Grieks, balkon met zeezicht. Iets chiquer, voor een speciale avond. Alleen zo open!", type: "Fine dining", prijs: "\u20ac\u20ac\u20ac", icon: "\u2728" },
+    { naam: "Potiraki", desc: "Creatieve Kretenzische keuken, mooie binnentuin. Aanrader voor foodies!", type: "Modern Kretenzisch", prijs: "\u20ac\u20ac-\u20ac\u20ac\u20ac", icon: "\ud83c\udf3a" },
+    { naam: "Migomis", desc: "Mooi terras boven de haven, fijne keuken, perfect voor een afscheids- of feestlunch", type: "Restaurant", prijs: "\u20ac\u20ac", icon: "\u2693" }
+  ],
+  eten_onderweg: [
+    { naam: "Taverna Spinalonga (Plaka)", desc: "Familiebedrijf aan zee, uitzicht op Spinalonga, verse vis", type: "Vis", prijs: "\u20ac\u20ac", icon: "\ud83c\udff0" },
+    { naam: "Taverna Maria's (Plaka)", desc: "Oudste taverna van Plaka, authentiek Grieks, warm onthaal", type: "Taverna", prijs: "\u20ac", icon: "\ud83d\udc75" },
+    { naam: "Bogazi (Mochlos)", desc: "Tafels op de kade, verse vis & octopus, ultiem Grieks dorpsgevoel", type: "Vis", prijs: "\u20ac\u20ac", icon: "\ud83d\udc19" },
+    { naam: "The Hope (Elounda)", desc: "Uitzicht over baai, traditioneel Grieks, goed Engels, boek vooraf voor beste tafel", type: "Taverna", prijs: "\u20ac\u20ac", icon: "\ud83c\udf05" },
+    { naam: "Marilena (Elounda)", desc: "Familiebedrijf sinds 1977, Kretenzisch & Cypriotisch, kindvriendelijk", type: "Taverna", prijs: "\u20ac\u20ac", icon: "\ud83c\udfe0" },
+    { naam: "Dorpstaverna Psychro (Lassithi)", desc: "Varken uit de houtoven, aardappelen van het plateau, berglucht erbij", type: "Berg-taverna", prijs: "\u20ac", icon: "\ud83c\udf56" },
+    { naam: "Balcony (Sitia)", desc: "Haven-uitzicht, verse vis, kindvriendelijk terras op de boulevard", type: "Restaurant", prijs: "\u20ac\u20ac", icon: "\ud83c\udf0a" },
+    { naam: "Psomi kai Alati (Elounda)", desc: "Rustiger familietaverna, heerlijk eten, avondzon", type: "Taverna", prijs: "\u20ac\u20ac", icon: "\ud83c\udf5e" }
+  ],
+  ijsjes_snacks: [
+    { naam: "Gelateria's Voulismeni-meer", desc: "Meerdere ijssalons aan de westkant van het meer", locatie: "Agios Nikolaos", icon: "\ud83c\udf66" },
+    { naam: "Gelateria Candia Park", desc: "IJssalon in het hotel zelf", locatie: "Hotel", icon: "\ud83c\udf68" },
+    { naam: "Babel Caf\u00e9 (Elounda)", desc: "Dorpsplein, ijsjes & drankjes, kids rennen op het plein", locatie: "Elounda", icon: "\u2615" },
+    { naam: "Gyros-pita to go", desc: "Overal in Agios Nikolaos \u2014 perfect als de kinderen moe zijn en je snel wilt eten (\u20ac3-4)", locatie: "Agios Nikolaos", icon: "\ud83e\udd59" },
+    { naam: "Bakker voor taart", desc: "Zoek een \u03b6\u03b1\u03c7\u03b1\u03c1\u03bf\u03c0\u03bb\u03b1\u03c3\u03c4\u03b5\u03af\u03bf voor verjaardagstaart of bougatsa (custardgebak)", locatie: "Agios Nikolaos", icon: "\ud83c\udf82" },
+    { naam: "Loukoumades", desc: "Griekse mini-donuts met honing \u2014 zoek een kraampje of bakker", locatie: "Diverse", icon: "\ud83c\udf69" }
+  ]
+};
+
+const typeColors = {
+  reisdag:   { bg: "#f0f4f8", accent: "#64748b", badge: "Reisdag" },
+  rustig:    { bg: "#f0fdf4", accent: "#22c55e", badge: "Relaxdag" },
+  uitstap:   { bg: "#eff6ff", accent: "#3b82f6", badge: "Uitstap" },
+  strand:    { bg: "#fefce8", accent: "#eab308", badge: "Stranddag" },
+  cultuur:   { bg: "#fdf4ff", accent: "#a855f7", badge: "Cultuur" },
+  avontuur:  { bg: "#fff7ed", accent: "#f97316", badge: "Avontuur" },
+  feest:     { bg: "#fdf2f8", accent: "#ec4899", badge: "Feestdag" },
+  kinderdag: { bg: "#ecfdf5", accent: "#10b981", badge: "Kinderdag" }
+};
+
+const swapMap = {};
+swapDays.forEach(s => { swapMap[s.id] = s; });
+
+let selectedDay = 0;
+
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2), 16);
+  const g = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function renderDayCard(day, isSwap) {
+  const colors = typeColors[day.type];
+  const accentFaded = hexToRgba(colors.accent, 0.53);
+  const accentBorder = hexToRgba(colors.accent, 0.13);
+  const accentSoft = hexToRgba(colors.accent, 0.09);
+  const itemsHtml = day.items.map((item, i) => `
+    <div class="item-row">
+      <div class="item-icon" style="background:${colors.bg}">${item.icon}</div>
+      <div style="flex:1">
+        <div class="item-time" style="color:${colors.accent}">${escapeHTML(item.time)}</div>
+        <div class="item-desc">${escapeHTML(item.desc)}</div>
+      </div>
+    </div>
+  `).join("");
+  const header = isSwap
+    ? `<div class="day-swap-info">🚗 ${escapeHTML(day.rijtijd)} · 🔄 ${escapeHTML(day.vervangt)}</div>`
+    : `<div class="day-date">${escapeHTML(day.date)}</div>`;
+  const badges = `
+    <div class="day-badges">
+      <span class="type-badge" style="color:${colors.accent};background:${accentSoft}">${colors.badge}</span>
+      ${isSwap ? '<span class="swap-badge">🔄 Swap</span>' : ''}
+      ${day.done ? '<span class="done-badge">✓ Gedaan</span>' : ''}
+    </div>`;
+  return `
+    <div class="day-card ${isSwap ? 'swap-card' : ''} ${day.done ? 'done-card' : ''}" style="--accent-faded:${accentFaded};--accent-border:${accentBorder}">
+      <div class="day-head" style="background:${colors.bg}">
+        ${badges}
+        <h2 class="day-title">${day.emoji} ${escapeHTML(day.title)}</h2>
+        ${header}
+      </div>
+      <div class="day-items">${itemsHtml}</div>
+      <div class="collapsibles">
+        <div class="collapsible">
+          <button class="collapsible-btn" style="color:${colors.accent}" onclick="toggleCollapsible(this)">
+            <span>🍽️ Eten & drinken tips</span>
+            <span class="collapsible-arrow">▼</span>
+          </button>
+          <div class="collapsible-body pitstops-body">${escapeHTML(day.pitstops)}</div>
+        </div>
+        <div class="collapsible">
+          <button class="collapsible-btn" style="color:${colors.accent}" onclick="toggleCollapsible(this)">
+            <span>💡 Praktische tip</span>
+            <span class="collapsible-arrow">▼</span>
+          </button>
+          <div class="collapsible-body">${escapeHTML(day.tip)}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDayTabs() {
+  const container = document.getElementById("dayTabs");
+  container.innerHTML = days.map((d, i) => {
+    const c = typeColors[d.type];
+    const isA = i === selectedDay;
+    const parts = d.date.split(" ");
+    const shortLabel = `${parts[1]} ${parts[2]}`;
+    const style = isA
+      ? `border-color:${c.accent};background:${c.bg};--accent:${c.accent};--accent-shadow:${hexToRgba(c.accent, 0.13)}`
+      : `--accent:${c.accent}`;
+    return `
+      <button class="day-tab ${isA ? 'active' : ''}" style="${style}" onclick="selectDay(${i})">
+        <div class="day-tab-emoji">${d.emoji}</div>
+        <div class="day-tab-label">${escapeHTML(shortLabel)}</div>
+        ${d.done ? '<div class="done-check">✓</div>' : (d.highlight ? '<div class="highlight-dot"></div>' : '')}
+        ${d.swappable ? '<div class="swap-mark">🔄</div>' : ''}
+      </button>`;
+  }).join("");
+}
+
+function renderDayCardMain() {
+  const day = days[selectedDay];
+  let html = renderDayCard(day, false);
+  if (day.swappable) {
+    const optionsHtml = day.swapOptions.map((id, i) => {
+      const s = swapMap[id];
+      return `<button class="swap-link" onclick="switchView('swaps')">${s.emoji} ${escapeHTML(s.title)}</button>${i < day.swapOptions.length - 1 ? ' of ' : ''}`;
+    }).join("");
+    html += `
+      <div class="swap-suggestion">
+        <span class="swap-suggestion-icon">🔄</span>
+        <div><strong>Swap mogelijk!</strong> Vervang door: ${optionsHtml}</div>
+      </div>`;
+  }
+  document.getElementById("dayCardContainer").innerHTML = html;
+  document.getElementById("dayCounter").textContent = `Dag ${selectedDay + 1}/${days.length}`;
+  document.getElementById("prevBtn").disabled = selectedDay === 0;
+  document.getElementById("nextBtn").disabled = selectedDay === days.length - 1;
+}
+
+function renderLegend() {
+  const html = Object.entries(typeColors).map(([k, v]) =>
+    `<span class="legend-chip" style="background:${v.bg};color:${v.accent};border:1px solid ${hexToRgba(v.accent, 0.2)}">${v.badge}</span>`
+  ).join("");
+  document.getElementById("legend").innerHTML = html;
+}
+
+function renderSwaps() {
+  document.getElementById("swapList").innerHTML = swapDays.map(s => renderDayCard(s, true)).join("");
+}
+
+function renderMenuSection(title, emoji, items, showPrice) {
+  const itemsHtml = items.map(item => {
+    let meta = (showPrice && item.prijs) ? `<span class="menu-item-price">${escapeHTML(item.prijs)}</span>` : "";
+    let suited = item.geschikt ? `<div class="menu-item-suited">👶 ${escapeHTML(item.geschikt)}</div>` : "";
+    let loc = "";
+    if (item.locatie && !item.prijs) {
+      loc = `<div class="menu-item-loc">📍 ${escapeHTML(item.locatie)}${item.duur ? ' · ⏱ ' + escapeHTML(item.duur) : ''}</div>`;
+    }
+    let typeLoc = item.type ? `<div class="menu-item-loc">📍 ${escapeHTML(item.type)}</div>` : "";
+    return `
+      <div class="menu-item">
+        <span class="menu-item-icon">${item.icon}</span>
+        <div style="flex:1">
+          <div class="menu-item-name">${escapeHTML(item.naam)}${meta}</div>
+          <div class="menu-item-desc">${escapeHTML(item.desc)}</div>
+          ${suited}
+          ${loc}
+          ${typeLoc}
+        </div>
+      </div>`;
+  }).join("");
+  return `
+    <div class="menu-section">
+      <div class="menu-section-head"><h3>${emoji} ${escapeHTML(title)}</h3></div>
+      <div class="menu-list">${itemsHtml}</div>
+    </div>`;
+}
+
+function renderMenu() {
+  document.getElementById("menuContainer").innerHTML =
+    renderMenuSection("Activiteiten op afroep", "🎯", menukaart.activiteiten, false) +
+    renderMenuSection("Restaurants Agios Nikolaos", "🍽️", menukaart.eten_agios, true) +
+    renderMenuSection("Restaurants onderweg", "🚗", menukaart.eten_onderweg, true) +
+    renderMenuSection("IJsjes, snacks & zoet", "🍦", menukaart.ijsjes_snacks, false);
+}
+
+function selectDay(i) {
+  selectedDay = i;
+  renderDayTabs();
+  renderDayCardMain();
+}
+function switchView(v) {
+  document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === v);
+  });
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById(`panel-${v}`).classList.add("active");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function toggleCollapsible(btn) {
+  btn.parentElement.classList.toggle("open");
+}
+
+document.querySelectorAll(".view-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchView(btn.dataset.view));
+});
+document.getElementById("prevBtn").addEventListener("click", () => {
+  if (selectedDay > 0) selectDay(selectedDay - 1);
+});
+document.getElementById("nextBtn").addEventListener("click", () => {
+  if (selectedDay < days.length - 1) selectDay(selectedDay + 1);
+});
+
+renderDayTabs();
+renderDayCardMain();
+renderLegend();
+renderSwaps();
+renderMenu();
+</script>
+</body>
+</html>
