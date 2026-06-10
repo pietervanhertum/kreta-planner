@@ -186,21 +186,20 @@ const days = [
       { time: "Avond", desc: "Grieks avondeten", icon: "\ud83d\udc1f" }
     ],
     pitstops: "\ud83c\udf55 Lunch: bij het zwembad van het hotel (Plori poolbar) of To Fili strandtaverna van het hotel \u2014 voeten in het zand \u00b7 \ud83c\udf66 IJsje: Gelateria in het hotel of in Agios Nikolaos bij het meer \u00b7 \ud83c\udf7d\ufe0f Diner: Chrysofyllis in Agios \u2014 echte vistarverna aan de haven, verse vangst, relaxed terras, kids mogen vrij rondlopen \u00b7 \ud83c\udf7d\ufe0f Alternatief: Potiraki \u2014 creatieve Kretenzische keuken, mooie binnentuin, iets chiquer maar zeker kindvriendelijk",
-    tip: "Rustdag! Kids Club heeft schatzoektochten, Griekse kooklessen en knutselen. Otto mag alleen in (4+), Rosie met een ouder erbij.",
-    highlight: false, swappable: true, swapOptions: ["swap-zuidkust", "swap-rethymno"] },
+    tip: "\u2705 GEDAAN \u2014 fijne rustdag! Pieter en Lieze hebben gedoken bij het PADI-centrum van het hotel, kids vermaakten zich in de Kids Club en bij het zwembad.",
+    highlight: false, swappable: true, swapOptions: ["swap-zuidkust", "swap-rethymno"], done: true },
   { date: "Donderdag 11 juni", title: "Lassithi-plateau & Kritsa", emoji: "\u26f0\ufe0f", type: "uitstap",
     items: [
       { time: "09:00", desc: "Vertrek richting Kritsa (\u00b115 min)", icon: "\ud83d\ude97" },
       { time: "09:30", desc: "Wandeling door Kritsa: steegjes, ambachtswinkeltjes", icon: "\ud83c\udfd8\ufe0f" },
       { time: "10:30", desc: "Doorrijden naar Lassithi-plateau (\u00b140 min bergweg)", icon: "\ud83d\ude97" },
-      { time: "11:30", desc: "Plateau verkennen: windmolens, dorpjes, uitzicht", icon: "\u26f0\ufe0f" },
-      { time: "12:00", desc: "Zeus-grot: ezelrit + Mythologie Themapark", icon: "\ud83e\udd6f" },
-      { time: "13:00", desc: "Lunch in een dorpstaverna op het plateau", icon: "\ud83c\udf56" },
+      { time: "11:30", desc: "Plateau verkennen: windmolens spotten, dorpjes, uitzicht \u2014 open ruimte waar de kids kunnen rennen", icon: "\u26f0\ufe0f" },
+      { time: "13:00", desc: "Lunch in een dorpstaverna op het plateau (Tzermiado of Agios Georgios)", icon: "\ud83c\udf56" },
       { time: "14:30", desc: "Dorp Krasi: oudste platanen van Kreta, Venetiaanse fontein", icon: "\ud83c\udf33" },
       { time: "16:00", desc: "Terugrijden naar hotel", icon: "\ud83d\ude97" }
     ],
-    pitstops: "\u2615 Kritsa: koffie of vers sinaasappelsap bij een kafenion op het dorpsplein \u2014 Otto en Rosie kunnen op het pleintje spelen \u00b7 \ud83c\udf56 Lunch plateau: taverna bij de Zeus-grot parking \u2014 heerlijk gebraden varken uit de houtoven, aardappelen van het plateau, berglucht! \u00b7 \ud83c\udf7d\ufe0f Alternatief: Taverna Krasi in het gelijknamige dorp \u2014 terras onder de eeuwenoude plataan, heerlijke dakos en lamsvlees \u00b7 \ud83c\udf7d\ufe0f Diner terug: licht eten bij het hotel of een gyros-pita halen in Agios Nikolaos (snel & lekker met vermoeide kinderen)",
-    tip: "\u26a0\ufe0f De Zeus-grot is mogelijk dicht voor renovatie \u2014 check voor vertrek! Het plateau zelf en de rit zijn sowieso geweldig. Neem een trui mee: 5-10\u00b0C koeler dan de kust!",
+    pitstops: "\u2615 Kritsa: koffie of vers sinaasappelsap bij een kafenion op het dorpsplein \u2014 Otto en Rosie kunnen op het pleintje spelen \u00b7 \ud83c\udf56 Lunch plateau (Tzermiado/Agios Georgios): proef de bergspecialiteiten! \u2192 dakos (broodsalade met tomaat & mizithra), antikristo (lamsvlees rond open vuur), Lassithi-aardappelen, lokale kazen (graviera, anthotyro). Zoet voor de kids: kalitsounia met honing + xerotigana. Gratis rakitje na voor papa & mama \u00b7 \ud83c\udf7d\ufe0f Alternatief: Taverna Krasi in het gelijknamige dorp \u2014 terras onder de eeuwenoude plataan, heerlijke dakos en lamsvlees \u00b7 \ud83c\udf7d\ufe0f Diner terug: licht eten bij het hotel of een gyros-pita halen in Agios Nikolaos (snel & lekker met vermoeide kinderen)",
+    tip: "Vroeg vertrekken \u2014 v\u00f3\u00f3r de hitte en de dagjestoeristen. Panagia Kera (kerk net v\u00f3\u00f3r Kritsa, mooie fresco's): open 8-15u, woensdag open. \u26a0\ufe0f Zeus-grot dicht voor renovatie t/m okt 2026 \u2014 niet plannen. Plateau is winderig & 5-10\u00b0C koeler dan de kust: trui mee, water & snacks (weinig voorzieningen), draagzak voor Rosie, cash bij (kleine zaken nemen niet altijd kaart).",
     highlight: false, swappable: false },
   { date: "Vrijdag 12 juni", title: "Richtis-waterval & Mochlos", emoji: "\ud83c\udf0a", type: "avontuur", 
     items: [
@@ -412,7 +411,7 @@ const typeColors = {
 const swapMap = {};
 swapDays.forEach(s => { swapMap[s.id] = s; });
 
-let selectedDay = 0;
+let selectedDay = 6;
 
 function escapeHTML(str) {
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
